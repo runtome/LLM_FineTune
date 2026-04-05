@@ -17,6 +17,6 @@ pip install -e .
 pip install -r requirements/metrics.txt
 pip install "deepspeed>=0.10.0,<=0.16.9" 
 pip install bitsandbytes jupyter
-pip install scikit-learn
+pip install scikit-learn datasets evaluate rouge-score
 cd ..
 pip list

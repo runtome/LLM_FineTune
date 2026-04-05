@@ -1,0 +1,11 @@
+### model
+model_name_or_path: Qwen/Qwen3-4B
+adapter_name_or_path: ${PROJECT_PATH}/trained_model/qwen3-4b-thaisum-adapter/
+template: qwen3
+# trust_remote_code: true
+
+### export
+export_dir: ${PROJECT_PATH}/trained_model/qwen3-4b-thaisum
+export_size: 5
+export_device: cpu
+export_legacy_format: false

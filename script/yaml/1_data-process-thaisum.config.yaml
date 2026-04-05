@@ -1,0 +1,15 @@
+### model
+model_name_or_path: Qwen/Qwen3-4B
+# trust_remote_code: true
+
+dataset: thai_news_summary
+template: qwen3
+cutoff_len: 4096
+overwrite_cache: true
+preprocessing_num_workers: 32
+dataset_dir : ${PROJECT_PATH}/script
+tokenized_path: ${PROJECT_PATH}/dataset/tokenized_dataset/thai_news_summary
+
+### output
+output_dir: ${PROJECT_PATH}/dataset/tokenized_dataset/thai_news_summary
+overwrite_output_dir: true

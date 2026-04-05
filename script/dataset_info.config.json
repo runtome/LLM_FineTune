@@ -26,5 +26,19 @@
       "assistant_tag": "assistant",
       "system_tag": "system"
     }
+  },
+  "thai_news_summary": {
+    "file_name": "${PROJECT_PATH}/dataset/format_dataset/thai_news_summary/thai_news_summary_train.json",
+    "formatting": "sharegpt",
+    "columns": {
+      "messages": "messages"
+    },
+    "tags": {
+      "role_tag": "role",
+      "content_tag": "content",
+      "user_tag": "user",
+      "assistant_tag": "assistant",
+      "system_tag": "system"
+    }
   }
 }
