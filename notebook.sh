@@ -8,7 +8,7 @@
 #SBATCH -A ltxxxxxx			# Specify project name
 #SBATCH -J nb               # Specify job name
 #SBATCH --output=./logs/nb.out
-#SBATCH --reservation=thaisc_311
+
 
 export PROJECT_PATH="" #YOUR PROJECT PATH
 

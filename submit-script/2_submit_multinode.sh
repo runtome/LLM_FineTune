@@ -8,7 +8,7 @@
 #SBATCH -A ltxxxxxx                     # Specify project name
 #SBATCH -J llamafac                         # Specify job name
 #SBATCH --output=../logs/train.out           # Output file
-#SBATCH --reservation=thaisc_311
+
 
 # Environment setup
 export NCCL_DEBUG=INFO

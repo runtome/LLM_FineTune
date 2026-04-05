@@ -7,7 +7,7 @@
 #SBATCH -A ltxxxxxx                     # Specify project name
 #SBATCH -J merge_adapter                    # Specify job name
 #SBATCH --output=../logs/merge.out           # Output file
-#SBATCH --reservation=thaisc_311
+
 
 export PROJECT_PATH="" #YOUR PROJECT PATH
 

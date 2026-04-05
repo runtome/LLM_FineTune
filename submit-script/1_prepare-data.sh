@@ -8,7 +8,7 @@
 #SBATCH -J pre-tokenizer                        # Specify job name
 #SBATCH -A ltxxxxxx                             # Specify project name
 #SBATCH --output=../logs/pre-tokenized.out        # Output file
-#SBATCH --reservation=thaisc_311
+
 
 export PROJECT_PATH="" #YOUR PROJECT PATH
 export CUDA_HOME="/opt/nvidia/hpc_sdk/Linux_x86_64/24.11/cuda/12.6"
