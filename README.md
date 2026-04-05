@@ -11,6 +11,8 @@ The current implementation uses:
 - SLURM scripts for Lanta/HPC execution
 - a manual Jupyter notebook for post-training inference
 
+Default hardware assumption in this README: **single NVIDIA A100 40GB** using **LoRA fine-tuning**, not full fine-tuning.
+
 ## 1. Repository Structure
 
 ```text
@@ -63,6 +65,56 @@ This dataset includes several columns such as `title`, `body`, `summary`, `type`
 
 - `body`: source article text
 - `summary`: reference summary
+
+### Raw Hugging Face format
+
+Typical raw dataset shape after `load_dataset("pythainlp/thaisum")`:
+
+```python
+ds["train"].column_names
+# ["title", "body", "summary", "type", "tags", "url"]
+```
+
+For this pipeline, keep only:
+
+```python
+ds = ds.remove_columns(
+    [col for col in ds["train"].column_names if col not in ["body", "summary"]]
+)
+```
+
+### Clean local dataset format
+
+After filtering, each local row is treated as:
+
+```json
+{
+  "body": "เนื้อหาข่าวภาษาไทย...",
+  "summary": "สรุปข่าวภาษาไทย..."
+}
+```
+
+This cleaned dataset is saved to:
+
+- `dataset/thaisum_hf/train.jsonl`
+- `dataset/thaisum_hf/validation.jsonl`
+- `dataset/thaisum_hf/test.jsonl`
+
+### Training format for LLaMA Factory
+
+The cleaned rows are converted into ShareGPT JSONL:
+
+```json
+{
+  "messages": [
+    {"role": "system", "content": "คุณเป็นผู้ช่วยสรุปข่าวภาษาไทย ..."},
+    {"role": "user", "content": "เนื้อหาข่าวภาษาไทย..."},
+    {"role": "assistant", "content": "สรุปข่าวภาษาไทย..."}
+  ]
+}
+```
+
+This is the actual format consumed by the `thai_news_summary` dataset entry in `script/dataset_info.config.json`.
 
 The script `prepare_thaisum_dataset.py` does all of the following:
 
@@ -125,13 +177,48 @@ For the first pipeline version, keep the target format simple: **one concise Tha
 
 ## 4. Model Selection and Fine-Tuning
 
-Recommended starting model:
+For **single A100 40GB**, the most practical choices are 4B to 8B models for LoRA SFT. Larger models may still be possible with aggressive settings, but they are not the best default for this repository.
 
-- `Qwen/Qwen3-4B` for cheaper, faster validation
+### Recommended model list for A100 40GB
 
-Upgrade path:
+| Model | Family | Official size/context | Recommendation in this repo | Notes |
+|---|---|---:|---|---|
+| `Qwen/Qwen3-4B` | Qwen3 | 4.0B, 32,768 native context | Best first run | Lowest risk for setup, tokenization, and LoRA smoke tests |
+| `Qwen/Qwen3-8B` | Qwen3 | 8.2B, 32,768 native context | Best default quality choice | Recommended when the pipeline is already stable |
+| `meta-llama/Llama-3.1-8B-Instruct` | Llama 3.1 | 8B | Good comparison baseline | Practical on A100 40GB with LoRA, but requires template/config review |
+| `google/gemma-3-4b-it` | Gemma 3 | 4B | Good small Gemma option | Useful if you want a Gemma-family baseline |
+| `google/gemma-3-12b-it` | Gemma 3 | 12B | Optional advanced run | More memory pressure; use only after the Qwen pipeline is stable |
 
-- `Qwen/Qwen3-8B` if quality is not enough and GPU memory allows it
+### Recommended order
+
+1. Start with `Qwen/Qwen3-4B`.
+2. Move to `Qwen/Qwen3-8B` for better summarization quality.
+3. Try `meta-llama/Llama-3.1-8B-Instruct` only as a comparison baseline.
+4. Try `google/gemma-3-4b-it` if you specifically want a Gemma-family run.
+5. Use `google/gemma-3-12b-it` only after batch size, context length, and checkpoint flow are already validated.
+
+### Not recommended by default on single A100 40GB
+
+- `google/gemma-3-27b-it`
+- `meta-llama/Llama-3.1-70B-Instruct`
+
+These are not the right default for this repo’s current single-GPU LoRA setup. They introduce more memory pressure, slower iteration, and more tuning risk before the pipeline itself is proven.
+
+### Important implementation note
+
+The repo is currently **Qwen3-first**:
+
+- training YAML files already use `Qwen/Qwen3-4B`
+- dataset formatting assumes the `qwen3` template
+- inference scripts are written around Qwen-style chat-template usage and `/no_think`
+
+If you switch to Llama or Gemma, also update:
+
+- `model_name_or_path`
+- chat template compatibility in LLaMA Factory
+- any tokenizer or inference behavior that is specific to Qwen3
+
+In practice, that means **Qwen3 is the safest recommendation today**, even though Llama 3.1 8B and Gemma 3 4B/12B are reasonable alternatives on A100 40GB.
 
 Current summarization configs:
 
@@ -147,6 +234,16 @@ Training settings currently default to:
 - batch size `4`
 - gradient accumulation `4`
 - epochs `3`
+
+### Official model references
+
+- Qwen3-4B: https://huggingface.co/Qwen/Qwen3-4B
+- Qwen3-8B: https://huggingface.co/Qwen/Qwen3-8B
+- Llama 3.1 8B Instruct: https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct
+- Gemma docs: https://ai.google.dev/gemma/docs/core
+- Gemma 3 model card: https://ai.google.dev/gemma/docs/core/model_card_3
+
+These references were used to verify the currently documented Qwen3, Llama 3.1, and Gemma 3 model families. If you meant "Gemmar4", this README assumes you meant **Gemma 3**, which is the current public open Gemma family documented by Google.
 
 ### Local Setup
 
