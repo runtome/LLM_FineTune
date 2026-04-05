@@ -1,0 +1,42 @@
+### model
+model_name_or_path: ${PROJECT_PATH}/model/qwen3-4b
+# trust_remote_code: true
+
+### method
+stage: sft
+do_train: true
+finetuning_type: lora
+lora_rank: 8
+lora_target: all
+deepspeed: ${PROJECT_PATH}/script/deepspeed/ds_z2_config.json  # choices: [ds_z0_config.json, ds_z2_config.json, ds_z3_config.json]
+
+### dataset
+dataset: wisesight_sentiment
+template: qwen3
+cutoff_len: 4096
+max_samples: 10000
+overwrite_cache: true
+preprocessing_num_workers: 16
+dataloader_num_workers: 4
+dataset_dir : ${PROJECT_PATH}/script
+tokenized_path: ${PROJECT_PATH}/dataset/tokenized_dataset/wisesight_sentiment
+
+### output
+output_dir: ${PROJECT_PATH}/trained_model/qwen3-4b-adapter/
+logging_steps: 10
+save_steps: 300
+plot_loss: true
+overwrite_output_dir: true
+save_only_model: false
+report_to: none  # choices: [none, wandb, tensorboard, swanlab, mlflow]
+
+### train
+per_device_train_batch_size: 8
+gradient_accumulation_steps: 2
+learning_rate: 1.0e-4
+num_train_epochs: 1
+lr_scheduler_type: cosine
+warmup_ratio: 0.1
+bf16: true
+ddp_timeout: 180000000
+resume_from_checkpoint: null

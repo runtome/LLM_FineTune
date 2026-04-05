@@ -1,0 +1,15 @@
+### model
+model_name_or_path: Qwen/Qwen3-8B
+# trust_remote_code: true
+
+dataset: asr_correction
+template: qwen3
+cutoff_len: 2048
+overwrite_cache: true
+preprocessing_num_workers: 32
+dataset_dir : ${PROJECT_PATH}/script
+tokenized_path: ${PROJECT_PATH}/dataset/tokenized_dataset/asr_correction
+
+### output
+output_dir: ${PROJECT_PATH}/dataset/tokenized_dataset/asr_correction
+overwrite_output_dir: true

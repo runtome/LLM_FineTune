@@ -1,0 +1,30 @@
+{
+  "wisesight_sentiment": {
+    "file_name": "${PROJECT_PATH}/dataset/format_dataset/wisesight_process/wisesight_sentiment_train.json",
+    "formatting": "sharegpt",
+    "columns": {
+      "messages": "messages"
+    },
+    "tags": {
+      "role_tag": "role",
+      "content_tag": "content",
+      "user_tag": "user",
+      "assistant_tag": "assistant",
+      "system_tag": "system"
+    }
+  },
+  "asr_correction": {
+    "file_name": "${PROJECT_PATH}/dataset/format_dataset/asr_correction/asr_correction_train.json",
+    "formatting": "sharegpt",
+    "columns": {
+      "messages": "messages"
+    },
+    "tags": {
+      "role_tag": "role",
+      "content_tag": "content",
+      "user_tag": "user",
+      "assistant_tag": "assistant",
+      "system_tag": "system"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+### model
+model_name_or_path: ${PROJECT_PATH}/model/qwen3-4b
+adapter_name_or_path: ${PROJECT_PATH}/trained_model/qwen3-4b-adapter/
+template: qwen3
+# trust_remote_code: true
+
+### export
+export_dir:  ${PROJECT_PATH}/trained_model/qwen3-4b-sentiment
+export_size: 5
+export_device: cpu  # choices: [cpu, auto]
+export_legacy_format: false
