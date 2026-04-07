@@ -5,7 +5,7 @@
 #SBATCH --gpus-per-node=1
 #SBATCH --ntasks-per-node=1
 #SBATCH -t 10:00:00
-#SBATCH -A ltxxxxxx
+#SBATCH -A zz991010
 #SBATCH -J pre-tokenizer-thaisum
 #SBATCH --output=../logs/pre-tokenized-thaisum.out
 

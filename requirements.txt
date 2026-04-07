@@ -1,0 +1,18 @@
+# Core runtime
+torch
+transformers
+pandas
+tqdm
+
+# Dataset preparation and evaluation
+datasets
+evaluate
+rouge-score
+scikit-learn
+
+# Notebook workflow
+jupyter
+
+# Optional GPU / training extras used by setup.sh and HPC jobs
+bitsandbytes
+deepspeed>=0.10.0,<=0.16.9
