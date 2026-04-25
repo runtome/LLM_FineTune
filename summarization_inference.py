@@ -62,7 +62,7 @@ def summarize_text(
     """Generate one summary."""
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": body + "\n/no_think"},
+        {"role": "user", "content": body},
     ]
 
     prompt = tokenizer.apply_chat_template(
@@ -71,11 +71,14 @@ def summarize_text(
         add_generation_prompt=True,
         enable_thinking=False,
     )
-    model_inputs = tokenizer([prompt], return_tensors="pt").to(model.device)
+    input_device = model.get_input_embeddings().weight.device
+    model_inputs = tokenizer([prompt], return_tensors="pt").to(input_device)
+    do_sample = temperature > 0.0
 
     generated_ids = model.generate(
         **model_inputs,
         max_new_tokens=max_new_tokens,
+        do_sample=do_sample,
         temperature=temperature,
         repetition_penalty=1.1,
     )
@@ -100,7 +103,12 @@ def main() -> None:
     parser.add_argument("--text_column", default="body", help="Column containing source text")
     parser.add_argument("--reference_column", default="summary", help="Optional reference-summary column")
     parser.add_argument("--max_new_tokens", type=int, default=256, help="Maximum tokens to generate")
-    parser.add_argument("--temperature", type=float, default=0.2, help="Generation temperature")
+    parser.add_argument(
+        "--temperature",
+        type=float,
+        default=0.0,
+        help="Generation temperature. Set above 0 to enable sampling.",
+    )
     args = parser.parse_args()
 
     input_df = load_input(args.input_path)

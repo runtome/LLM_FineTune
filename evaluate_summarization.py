@@ -10,6 +10,11 @@ from pathlib import Path
 
 import pandas as pd
 
+try:
+    from pythainlp.tokenize import word_tokenize
+except ImportError:
+    word_tokenize = None
+
 
 def load_predictions(path: str) -> pd.DataFrame:
     """Load CSV or JSONL prediction file."""
@@ -21,7 +26,29 @@ def load_predictions(path: str) -> pd.DataFrame:
     raise ValueError(f"Unsupported evaluation file format: {suffix}")
 
 
-def compute_rouge(df: pd.DataFrame, prediction_column: str, reference_column: str) -> dict[str, float]:
+def prepare_rouge_text(text: str, language: str) -> str:
+    """Normalize text for ROUGE scoring."""
+    text = str(text or "").strip()
+    if not text:
+        return ""
+
+    if language == "thai":
+        if word_tokenize is None:
+            raise ImportError(
+                "Thai ROUGE requires `pythainlp`. Install it with `pip install pythainlp` "
+                "or run `bash setup.sh` in this repository."
+            )
+        return " ".join(word_tokenize(text, engine="newmm", keep_whitespace=False))
+
+    return text
+
+
+def compute_rouge(
+    df: pd.DataFrame,
+    prediction_column: str,
+    reference_column: str,
+    language: str,
+) -> dict[str, float]:
     """Return mean ROUGE F1 scores."""
     try:
         from rouge_score import rouge_scorer
@@ -36,8 +63,8 @@ def compute_rouge(df: pd.DataFrame, prediction_column: str, reference_column: st
 
     valid_rows = 0
     for _, row in df.iterrows():
-        prediction = str(row.get(prediction_column) or "").strip()
-        reference = str(row.get(reference_column) or "").strip()
+        prediction = prepare_rouge_text(row.get(prediction_column), language)
+        reference = prepare_rouge_text(row.get(reference_column), language)
         if not prediction or not reference:
             continue
 
@@ -61,11 +88,22 @@ def main() -> None:
     )
     parser.add_argument("--prediction_column", default="generated_summary", help="Prediction column name")
     parser.add_argument("--reference_column", default="summary", help="Reference column name")
+    parser.add_argument(
+        "--language",
+        choices=["thai", "whitespace"],
+        default="thai",
+        help="Tokenization strategy for ROUGE. Use `thai` for Thai text.",
+    )
     parser.add_argument("--output_path", default=None, help="Optional JSON output path")
     args = parser.parse_args()
 
     prediction_df = load_predictions(args.prediction_path)
-    metrics = compute_rouge(prediction_df, args.prediction_column, args.reference_column)
+    metrics = compute_rouge(
+        prediction_df,
+        args.prediction_column,
+        args.reference_column,
+        args.language,
+    )
     print(json.dumps(metrics, ensure_ascii=False, indent=2))
 
     if args.output_path:

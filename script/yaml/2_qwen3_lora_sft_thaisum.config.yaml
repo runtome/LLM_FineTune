@@ -13,9 +13,9 @@ lora_target: all
 
 ### dataset
 dataset: thai_news_summary
+eval_dataset: thai_news_summary_validation
 template: qwen3
 cutoff_len: 4096
-max_samples: 50000
 overwrite_cache: true
 preprocessing_num_workers: 16
 dataloader_num_workers: 4
@@ -41,3 +41,9 @@ warmup_ratio: 0.1
 bf16: true
 ddp_timeout: 180000000
 resume_from_checkpoint: null
+
+### eval
+do_eval: true
+per_device_eval_batch_size: 4
+eval_strategy: steps
+eval_steps: 500
